@@ -21,7 +21,7 @@ class DatasetBrowser extends React.Component {
     
     constructor(props) {
         super(props);
-        this.state = {templates: [], datasets: [], orgName: this.props.orgName, userName: this.props.userName, dataName: "", elements: [], roles: []};
+        this.state = {templates: [], datasets: [], orgName: this.props.orgName, userName: this.props.userName, dataName: "NEGL North West River Labrador NLQU0007", elements: [], roles: []};
     }
 
     componentDidUpdate(nextProps) {
@@ -67,13 +67,13 @@ class DatasetBrowser extends React.Component {
     }
 
     getDatasets() {
-        const session = driver.session({database: db});
+        const session = driver.session();
         const params = {"orgName": this.state.orgName};
         const updateTemplate = `match (role:role {name: $roleName})-[rel:uses_template]->() delete rel; 
-        match (r:role {name: $roleName}), (t:template {name: $templateName}) create (r)-[x:uses_template]-(t)`;
-        const queryTemplates = 'match (d:dataset {name: $dataName})-[:has_template]-> (t:template) return t';
+        match (r:role {name: $roleName}), (t:template {name: $templateName}) create (r)-[:uses_template]-(t)`;
+        const queryTemplates = 'match (d:dataset {name: $dataName})-[:has_template]->(t:template) return t';
         const queryElements = 'match (n:element) return n';
-        const queryRoles = 'match (n:role)-[x:uses_template]->(t:template) return n, t';
+        const queryRoles = 'match (n:role)-[x:uses_template]->(t:template)<-[:has_template]-(d:dataset {name: $dataName}) return n, t';
         const queryDatasets = 'match (o:organization {name: $orgName})-[:owns]->(n:dataset) return n';
         session.run(queryDatasets, params)
         .then((result) => {
@@ -89,7 +89,7 @@ class DatasetBrowser extends React.Component {
                 return record.get("t").properties.name;
             }).sort();
             this.setState((state) => ({templates: newstate}));
-            return session.run(queryRoles)
+            return session.run(queryRoles, {"dataName":this.state.dataName})
         }).then((result) =>{
             let newstate = result.records.map((record) => {
                 return {role: record.get("n").properties.name, uses: record.get("t").properties.name};
