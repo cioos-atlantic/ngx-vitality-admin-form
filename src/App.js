@@ -7,16 +7,25 @@ import { GoogleLogout, GoogleLogin } from 'react-google-login';
 
 
 
-
+/**
+ * Main application information. Provides Google login button and form updating features as children.
+ * 
+ * @returns Google login bar at the top, with ShowMetaForm component.
+ *
+ */
 function App() {
   const clientId = configData.FIREBASE.clientId;
   const [isLoggedIn, setIsLoggedIn] = useState(null);
   const [name, setName] = useState("guest");
+  const [id, setId] = useState("0");
 
+  /// Handle Google login request.
   const responseGoogle = response => {
     setIsLoggedIn(true);
     setName(response.profileObj.name);
   }
+
+  /// Handle an error in the Google response.
   const responseFail = response => {
     console.log(response);
     setIsLoggedIn(false);
@@ -25,6 +34,7 @@ function App() {
   const logout = response => {
     setIsLoggedIn(false);
     setName("guest");
+    setId("0");
   }
 
   useEffect(() => {
