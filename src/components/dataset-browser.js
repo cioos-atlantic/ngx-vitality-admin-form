@@ -9,7 +9,9 @@ const db = configData.NEO4J_DATABASE;
 const neo4j = require('neo4j-driver');
 const driver = neo4j.driver(uri, neo4j.auth.basic(user, password), {});
 
-
+/**
+ * Data class to describe a user role.
+ */
 class Role {
     constructor(role, uses ){
         this.role = role;
@@ -17,6 +19,10 @@ class Role {
     }
 }
 
+/**
+ * React component to show datasets available in the registry, and the access permissions
+ * based on templates and user roles.
+ */
 class DatasetBrowser extends React.Component {
     
     constructor(props) {
@@ -33,8 +39,12 @@ class DatasetBrowser extends React.Component {
         }    
     }
 
-    /// TODO: Rename this to reflect that it changes dataset name.
-    isActive(name) {
+    /**
+     * 
+     * @param {string} name - the name of the dataset
+     * @returns bool
+     */
+    isActiveDataset(name) {
         return this.state.dataName === name ? "active" : "";
     }
 
