@@ -52,6 +52,7 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
     setData(dataset: Dataset) {
         this.setState((state) => ({ dataName: dataset }));
         this.getTemplates();
+        this.getRoles();
     }
 
     getDatasets() {
@@ -84,6 +85,7 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
 
     componentDidMount() {
         this.getDatasets();
+        this.getTemplates();
 
     }
 
