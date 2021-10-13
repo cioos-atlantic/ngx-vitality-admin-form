@@ -6,7 +6,8 @@ import Button from '@mui/material/Button';
 import DatabaseService from '../services/database';
 import Role from '../state/role';
 import { Box, Chip, Container, Grid } from '@mui/material';
-
+import {Table, TableBody, TableCell, TableHead, TableRow, TableContainer} from '@mui/material';
+import {Paper} from '@mui/material';
 /**
  * React component to show datasets available in the registry, and the access permissions
  * based on templates and user roles.
@@ -124,7 +125,7 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
         let defined = typeof this.state.dataName !== 'undefined';
         let datasetDesc = defined ? this.state.dataName!.description : "Please choose a dataset to see options.";
         let datasetName = defined ? this.state.dataName!.name : "";
-        let templateList = this.state.templates!.map((template, ind) => <th key={template.id}>{template.name}</th>);
+        let templateList = this.state.templates!.map((template, ind) => <TableCell component="th" key={template.id}>{template.name}</TableCell>);
         let roles = this.state.roles!
           .filter((valid) => this.state.templates!
             .map((temp) => temp.name)
@@ -135,11 +136,10 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
               let checked = role.uses === temp.name;
                 // if item is admin, disable any template except "full"
               let disabled = (role.role === "admin" && temp.name !== "full");  
-              return <td key={role.role + temp.id}><input key={role.role + temp.id} name={role.role + "radio"} type="radio" disabled={disabled} defaultChecked={checked}></input></td>})
-          return <tr key={role.role + ind + "row"} className={"btn-group-" + role.role} role="group">
-            <th key={role.role + ind + "head"} scope="row">{role.role}</th>
-            {cols}
-        </tr> });   
+              return <TableCell component="td" key={role.role + temp.id}><input key={role.role + temp.id} name={role.role + "radio"} type="radio" disabled={disabled} defaultChecked={checked}></input></TableCell>})
+          return <TableRow key={role.role + ind + "row"} className={"btn-group-" + role.role} role="group">
+            <TableCell component="th" key={role.role + ind + "head"} scope="row">{role.role}</TableCell>
+            {cols}</TableRow> });   
 
         let userName = this.state.userName;
         return (
@@ -152,17 +152,18 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
                         <h2> Dataset pane for {datasetName}</h2>
                         <div className="row">{datasetDesc}.</div>
                         <form onSubmit={this.handleSubmit}>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th key="role-header" scope="col">Role</th>
+                            <TableContainer component={Paper}>
+                            <Table sx={{ minWidth: 650}}>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell component="th" key="role-header" scope="col">Role</TableCell>
                                         {userName === "guest" ? [] : templateList}
-
-                                    </tr>
-                                </thead>
+                                    </TableRow>
+                                </TableHead>
 
                                 <tbody>{userName == "guest" ? [] : roles}</tbody>
-                            </table>
+                            </Table>
+                            </TableContainer>
                         </form>
                     </Grid>
                 </Grid>
