@@ -8,8 +8,6 @@ interface Queries {
     updateTemplateByName : string;
     elements : string;
     roles : string;
-    descriptionEN : string;
-    descriptionFR : string;        
 }
 
 export interface Param {}
@@ -63,10 +61,6 @@ export const queries: Queries = {
     elements : 
       'match(n: element) return n',
     roles: `match (n:role)-[x:uses_template]->(t:template)<-[:has_template]-(d:dataset {id: $dataId}) 
-      return n, t`,
-    descriptionEN :
-      "match (d:dataset {id:$dataId}) return d.description_en",
-    descriptionFR :
-      "match (d:dataset {id:$dataId}) return d.description_fr"
+      return n, t`
 }
 
