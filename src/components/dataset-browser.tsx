@@ -93,7 +93,6 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
     componentWillUnmount() {
 
     }
-
     
 
     /**
@@ -135,7 +134,7 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
     render() {
         let defined = this.state.dataInd !== '';
         let dataset = this.getDatasetByIndex(this.state.dataInd);
-        let datasetDesc = defined ? dataset.description : "Please choose a dataset to see options.";
+        let datasetDesc = defined ? dataset.description_en : "Please choose a dataset to see options.";
         let datasetName = defined ? dataset.name : "";
         let templateList = this.state.templates!.map((template, ind) => <TableCell component="th" key={template.id}>{template.name}</TableCell>);
         let roles = this.state.roles!

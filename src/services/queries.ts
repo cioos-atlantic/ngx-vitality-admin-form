@@ -9,7 +9,9 @@ interface Queries {
     updateTemplateByName : string;
     updateTemplatesById : string;
     elements : string;
-    roles : string;       
+    roles : string;
+    descriptionEN : string;
+    descriptionFR : string;        
 }
 
 export interface Param {}
@@ -45,19 +47,19 @@ export interface ElemParam extends Param {
 
 export const queries: Queries = {
     org : 
-      'match (u:guser {name: $userName})--(o:organization) return o',
+      'match (u:user {name: $userName})-->(o:organization) return o',
     userByGid: 
-      'match (u:guser {gid: $userGid}) return u',
+      'match (u:user {gid: $userGid}) return u',
     datasetsById : 
-      `MATCH (u:guser {id:$userId})-[:serves]->(o) 
+      `MATCH (u:user {id:$userId})-->(o) 
       WITH o 
       MATCH (o)-[:owns]->(d:dataset) 
-      RETURN o{.name, .id, datasets:collect(d{.id, .name})}`,
+      RETURN o{.name, .id, datasets:collect(d{.id, .name, .description_en})}`,
     datasetsByName :
-      `match (u:guser {name: $userName})-[:serves]->(o) 
+      `match (u:user {name: $userName})-[:serves]->(o)  
       with (o)
       match (o)-[:owns]->(d:dataset)
-      return o{.name, .id, datasets:collect(d{.id, .name})}`,
+      return o{.name, .id, datasets:collect(d{.id, .name, .description_en})}`,
     removeTemplatesByRoleName : 
       'match (role:role {name: $roleName})-[rel:uses-template]->() delete rel',
     removeTemplatesByRoleId :
@@ -74,6 +76,10 @@ export const queries: Queries = {
     elements : 
       'match(n: element) return n',
     roles: `match (n:role)-[x:uses_template]->(t:template)<-[:has_template]-(d:dataset {id: $dataId}) 
-      return n, t`
+      return n, t`,
+    descriptionEN :
+      "match (d:dataset {id:$dataId}) return d.description_en",
+    descriptionFR :
+      "match (d:dataset {id:$dataId}) return d.description_fr"
 }
 

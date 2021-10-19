@@ -13,7 +13,8 @@ export interface User extends State {
 export interface Dataset extends State {
     id: string | number;
     name: string;
-    description?: string; 
+    description_en: string; 
+    description_fr: string;
 }
 
 export interface OrgDataset extends State {
