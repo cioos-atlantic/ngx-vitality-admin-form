@@ -1,12 +1,11 @@
 import * as React from 'react';
-import * as configData from '../config.json';
 import { MainProps } from './show-meta-form';
 import { Dataset, DataState, OrgDataset, Template } from '../state/datastate';
 import Button from '@mui/material/Button';
 import DatabaseService from '../services/database';
-import Role from '../state/role';
+import { RoleTemp } from '../state/role';
 import { Box, Chip, Container, Grid } from '@mui/material';
-import {Table, TableBody, TableCell, TableHead, TableRow, TableContainer} from '@mui/material';
+import {Table, TableCell, TableHead, TableRow, TableContainer} from '@mui/material';
 import {Paper} from '@mui/material';
 /**
  * React component to show datasets available in the registry, and the access permissions
@@ -20,39 +19,39 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
         super(props);
 
         this.state = {
+            showconfirm: false,
             templates: [],
             datasets: [],
             orgName: this.props.orgName,
             userName: this.props.user,
             userId: this.props.id,
-            elements: [], roles: []
-        };
+            dataInd: "",
+            elements: [], 
+            roles: []
+            
+        } as DataState;
     }
 
     componentDidUpdate(nextProps: MainProps) {
         if (this.props !== nextProps) {
-
+            console.log("updated");
             this.setState({ orgName: this.props.orgName, userName: this.props.user });
             this.getDatasets();
-            //this.setData(this.state.datasets[0])
-            // this.setState({dataName: this.state.datasets[0]});
-        }
+            
+        }}
+
+
+    getDatasetByIndex(index: string) {
+        let alldatasets: Dataset = this.state.datasets
+          .map((org) => {return org.datasets})
+           .reduce((a, v) => a.concat(v), [])
+           .filter((dataset) => dataset.id === index)[0]
+        return alldatasets;
     }
 
-    /**
-     * 
-     * @param {string} name - the name of the dataset
-     * @returns bool
-     */
-    isActiveDataset(name: string) {
-        return this.state.dataName!.name === name ? "active" : "";
-    }
 
-
-    setData(dataset: Dataset) {
-        this.setState((state) => ({ dataName: dataset }));
-        this.getTemplates();
-        this.getRoles();
+    setData(ind: string) {
+        this.setState((state) => ({ dataInd: ind }), () => this.getTemplates());     
     }
 
     getDatasets() {
@@ -66,19 +65,22 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
     }
 
     getTemplates() {
-        this.getRoles();
-        if (typeof this.state.dataName !== 'undefined') {
-            this._db.getTemplates(this.state.dataName).then((res: Template[]) => {
+        if (this.state.dataInd !== "") {
+            this.getRoles();
+            let dataset = this.getDatasetByIndex(this.state.dataInd);
+            this._db.getTemplates(dataset).then((res: Template[]) => {
                 this.setState((state) => ({ templates: res}))
             })
         }
     }
 
     getRoles() {
-        if (typeof this.state.dataName !== 'undefined') {
-            this._db.getRoles(this.state.dataName).then((res: Role[]) => {
-                console.log(res);
-                this.setState((state) => ({ roles: res}))
+        if (this.state.dataInd !== '') {
+            console.log(this.state.dataInd);
+            let dataset = this.getDatasetByIndex(this.state.dataInd);
+            console.log(dataset);
+            this._db.getRoles(dataset).then((res: RoleTemp[]) => {
+                this.setState((state) => ({ roles: res}));
             })
         }
     }
@@ -86,7 +88,6 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
     componentDidMount() {
         this.getDatasets();
         this.getTemplates();
-
     }
 
     componentWillUnmount() {
@@ -103,10 +104,10 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
         let ret = this.state.datasets.map((org) => {
             // highlight button if it is the current one.   
             let datasets: JSX.Element[] = org.datasets.map((dataset) => {
-                let active: Boolean = typeof this.state.dataName !== 'undefined' && dataset.id === this.state.dataName.id;
+                let active: Boolean = this.state.dataInd !== "" && dataset.id === this.state.dataInd;
                 return <Box mx="auto">
                     <Button variant={active ? "outlined" : "contained"}
-                    onClick={() => this.setData(dataset)}
+                    onClick={() => this.setData(dataset.id.toString())}
                     key={dataset.id + "select"}>{dataset.name}</Button>
                     </Box>
             });
@@ -118,29 +119,44 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
         }}>{ret}</Grid>)
     }
 
-    handleSubmit() {
-
+    handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        const answer = window.confirm("Are you sure you want to update the templates?");
+        if (answer) {
+            console.log("update template");
+            console.log(event);
+        } else {
+            console.log("do not update template");
+        }
+         
     }
 
 
     render() {
-        let defined = typeof this.state.dataName !== 'undefined';
-        let datasetDesc = defined ? this.state.dataName!.description : "Please choose a dataset to see options.";
-        let datasetName = defined ? this.state.dataName!.name : "";
+        let defined = this.state.dataInd !== '';
+        let dataset = this.getDatasetByIndex(this.state.dataInd);
+        let datasetDesc = defined ? dataset.description : "Please choose a dataset to see options.";
+        let datasetName = defined ? dataset.name : "";
         let templateList = this.state.templates!.map((template, ind) => <TableCell component="th" key={template.id}>{template.name}</TableCell>);
         let roles = this.state.roles!
           .filter((valid) => this.state.templates!
             .map((temp) => temp.name)
-            .includes(valid.uses)) 
-          .map((role, ind) => {
+            .includes(valid.uses.name)) 
+          .map((roletemp, ind) => {
             let cols = this.state.templates!.map((temp) => {
                 // is item set using template?
-              let checked = role.uses === temp.name;
+              let checked = roletemp.uses.name === temp.name;
                 // if item is admin, disable any template except "full"
-              let disabled = (role.role === "admin" && temp.name !== "full");  
-              return <TableCell component="td" key={role.role + temp.id}><input key={role.role + temp.id} name={role.role + "radio"} type="radio" disabled={disabled} defaultChecked={checked}></input></TableCell>})
-          return <TableRow key={role.role + ind + "row"} className={"btn-group-" + role.role} role="group">
-            <TableCell component="th" key={role.role + ind + "head"} scope="row">{role.role}</TableCell>
+              let disabled = (roletemp.role.name === "admin" && temp.name !== "full");  
+              return <TableCell component="td" key={roletemp.role.id + temp.id}>
+                  <input key={roletemp.role.id + temp.id} 
+                         name={roletemp.role.id + "radio"} 
+                         type="radio" disabled={disabled} 
+                         defaultChecked={checked}>
+                  </input>
+                  </TableCell>})
+          return <TableRow key={roletemp.role.id + ind + "row"} className={"btn-group-" + roletemp.role.id} role="group">
+            <TableCell component="th" key={roletemp.role.id + ind + "head"} scope="row">{roletemp.role.name}</TableCell>
             {cols}</TableRow> });   
 
         let userName = this.state.userName;
@@ -162,10 +178,10 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
                                         {userName === "guest" ? [] : templateList}
                                     </TableRow>
                                 </TableHead>
-
-                                <tbody>{userName == "guest" ? [] : roles}</tbody>
+                                <tbody>{userName === "guest" ? [] : roles}</tbody>
                             </Table>
                             </TableContainer>
+                            <Button type="submit" variant="contained">Update Templates</Button>
                         </form>
                     </Grid>
                 </Grid>

@@ -4,7 +4,7 @@ import NotImplemented from '../util/not-implemented';
 import { DatasetParam, Param, queries} from './queries';
 import * as neo4j from 'neo4j-driver';
 import { User, OrgDataset, Dataset, Template, State } from '../state/datastate';
-import Role from '../state/role';
+import {Role, RoleTemp} from '../state/role';
 
 /**
  * A service to control access to and from the database.
@@ -42,7 +42,7 @@ class DatabaseService {
     /**
      * Gets a user profile based on a google id.
      * @param gid - the google id of the user.
-     * @returns - a node id corresponding to the google id.
+     * @returns - a promise with the User corresponding to the google id.
      *
      */
     async getUserId(gid: string): Promise<User> {
@@ -53,7 +53,6 @@ class DatabaseService {
             return await session.run(queries.userByGid, param)
                 .then((result) => {
                     return result.records.map((record) => {
-                        console.log(record);
                         return record.get('u').properties;
                     })[0]
                 })
@@ -78,7 +77,7 @@ class DatabaseService {
      * Retrieve organizations and datasets accessible to the user based on id.
      * 
      * @param userid 
-     * @returns 
+     * @returns a promise with the list of OrgDatasets
      */
     async getDatasets(userid: string): Promise<OrgDataset[]> {
         let param: DatasetParam = { userId: userid };
@@ -114,38 +113,72 @@ class DatabaseService {
         }
     }
 
-    async getRoles(dataset: Dataset) {
+    /**
+     * Gather the roles that are available to access a particular dataset.
+     * 
+     * @param dataset - the dataset to retreive the roles.
+     * @returns a promise containing a list of roles available to the dataset.
+     */
+    async getRoles(dataset: Dataset): Promise<RoleTemp[]> {
         let session!: neo4j.Session; 
         try {
             session = this._driver.session({database: this._db});
-            return await session.run(queries.roles, {dataId: dataset.id.toString()})
+            let roletemps: RoleTemp[] = await session.run(queries.roles, {dataId: dataset.id.toString()})
               .then((result) => {
                   return result.records.map((record) => {
-                      let role: Role = {role: record.get("n").properties.name, uses: record.get("t").properties.name} ;
-                      console.log(role);
+                      let role: RoleTemp = {
+                        role: {
+                          id: record.get("n").properties.id, 
+                          name: record.get("n").properties.name,
+                          immute: record.get("n").properties.immute
+                        } as Role, 
+                        uses: {
+                          id: record.get("t").properties.id,
+                          name: record.get("t").properties.name,
+                          description: record.get("t").properties.description
+                        } as Template
+                    } as RoleTemp;
                       return role;    
-                  })
-              })
+                  })     
+              });
+              return roletemps.sort(this.sortRoleTempsPredicate);
         } catch (e) {
             if (e instanceof Neo4jError) {
                 session = this._driver.session();
-                return await session.run(queries.roles, {dataId: dataset.id.toString()})
+                let roletemps: RoleTemp[] = await session.run(queries.roles, {dataId: dataset.id.toString()})
                     .then((result) => {
                         return result.records.map((record) => {
-                            let role: Role = {role: record.get("n").properties.name, uses: record.get("t").properties.name};
-                            return role;
+                            let role: RoleTemp = {
+                              role: {
+                                id: record.get("n").properties.id, 
+                                name: record.get("n").properties.name,
+                                immute: record.get("n").properties.immute
+                              } as Role, 
+                              uses: {
+                                id: record.get("t").properties.id,
+                                name: record.get("t").properties.name,
+                                description: record.get("t").properties.description
+                              } as Template
+                          } as RoleTemp;
+                            return role;    
                         })
                     });
+                    return roletemps.sort(this.sortRoleTempsPredicate);
             } else {
                 throw e;
             }
         } finally {
             session.close();
         }
-
     }
-
-    async getTemplates(dataset: Dataset) {
+   
+    /**
+     * Retrieve the templates available for a particular datasets.
+     * 
+     * @param dataset 
+     * @returns 
+     */
+    async getTemplates(dataset: Dataset): Promise<Template[]> {
         let session!: neo4j.Session; 
         try {
             session = this._driver.session({database: this._db});
@@ -174,12 +207,36 @@ class DatabaseService {
         }
     }
 
-    updateTemplate(role: Role, template: Template) {
-
+    async updateTemplate(role: RoleTemp, template: Template) {
+        // role contains the current template as role.uses
+        if (role.uses.id !== template.id) {
+          let session!: neo4j.Session;
+          try {
+            session = this._driver.session({database: this._db});
+            return await session.run(queries.removeTemplatesByRoleId, {roleId: role.role.id.toString()})
+              .then((result) => {
+                  session.run(queries.updateTemplatesById, {
+                      roleId: role.role.id.toString(), 
+                      templateId: template.id.toString()
+                    })
+                  });
+              } catch (e) {
+            if (e instanceof Neo4jError) {
+                session = this._driver.session();
+                return await session.run(queries.removeTemplatesByRoleId, {roleId: role.role.id.toString()})
+                  .then((result) => {
+                    session.run(queries.updateTemplatesById, {
+                      roleId: role.role.id.toString(), 
+                      templateId: template.id.toString()
+                    })
+                  });
+            } else {
+                throw e;
+            }
+        } finally {
+            session.close();
+        }
     }
-
-    getDriver() {
-        return this._driver;
     }
 
     makeQueryNeo4J(query: string, params: Param) {
@@ -210,6 +267,31 @@ class DatabaseService {
 
     get pins(): string[] {
         return DatabaseService._pins;
+    }
+
+    /**
+     * A sorting predicate for the RoleTemp type.
+     * 
+     * @param item1: State - first RoleTemp comparitor
+     * @param item2: State - second RoleTemp comparitor
+     * @param by: string - if by is not "role" exactly, it will use uses.
+     * @returns 
+     */
+    sortRoleTempsPredicate(item1:RoleTemp, item2:RoleTemp, by="role") {
+        let p = DatabaseService._pins;
+        if (p.includes(item1.role.name.toLowerCase()) && p.includes(item2.role.name.toLowerCase())) {
+            return p.indexOf(item1.role.name.toLowerCase()) - p.indexOf(item2.role.name.toLowerCase());
+        } else if (p.includes(item1.role.name.toLowerCase())) {
+            return -1;
+        } else if (p.includes(item2.role.name.toLowerCase())) {
+            return 1;
+        } else {
+            let x = item1.role.name.toLowerCase();
+            let y = item2.role.name.toLowerCase();
+            if (x < y) { return -1; }
+            if (x > y) { return 1; }
+            return 0;
+        }
     }
 
     /**

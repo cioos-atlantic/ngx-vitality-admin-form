@@ -1,15 +1,9 @@
 // import logo from './logo.svg';
-import React, { useEffect, useState, FunctionComponent } from 'react';
+import { useEffect, useState } from 'react';
 import ShowMetaForm from './components/show-meta-form';
 import './App.css';
 import configData from './config.json';
-import { GoogleLogin, GoogleLogout, GoogleLoginResponse, GoogleLoginResponseOffline } from 'react-google-login';
-
-
-
-interface GoogleSignInComponentProps {
-  loginSuccess: (response: GoogleLoginResponse | GoogleLoginResponseOffline) => void;
-}
+import { GoogleLogin, GoogleLogout } from 'react-google-login';
 
 /**
  * Main application information. Provides Google login button and form updating features as children.
@@ -25,7 +19,6 @@ function App() {
 
   /// Handle Google login request.
   const responseGoogle = (response: any) => {
-    console.log(response);
     setName(response.profileObj.name);
     setId(response.profileObj.googleId);
     setIsLoggedIn(true);
@@ -33,7 +26,6 @@ function App() {
 
   /// Handle an error in the Google response.
   const responseFail = (response: any) => {
-    console.log(response);
     setIsLoggedIn(false);
   }
 

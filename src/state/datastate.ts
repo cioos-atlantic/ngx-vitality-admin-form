@@ -1,4 +1,4 @@
-import Role from './role';
+import Role, { RoleTemp } from './role';
 
 export interface State {
     name: string;
@@ -26,16 +26,16 @@ export interface Template extends State {
     name: string,
     id: string | number;
     description: string;
-
 }
 
 export interface DataState {
+    showconfirm: boolean
     templates?: Template[];
-    datasets: OrgDataset[];
+    datasets: OrgDataset[];  
     orgName?: string;
     userId?: string;
     userName?: string;
-    dataName?: Dataset;
+    dataInd: string;
     elements?: string[];
-    roles?: Role[];
+    roles?: RoleTemp[];  
 }

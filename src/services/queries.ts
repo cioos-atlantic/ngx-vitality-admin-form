@@ -4,8 +4,10 @@ interface Queries {
     datasetsById : string;
     datasetsByName : string;
     templates: string;
-    removeTemplatesByName : string;
+    removeTemplatesByRoleName : string;
+    removeTemplatesByRoleId : string;
     updateTemplateByName : string;
+    updateTemplatesById : string;
     elements : string;
     roles : string;       
 }
@@ -32,6 +34,11 @@ export interface RoleParam extends Param {
     dataName: string;
 }
 
+export interface RoleTempParam extends Param {
+    roleId: string;
+    templateId: string
+}
+
 export interface ElemParam extends Param {
     element: string;
 }
@@ -51,10 +58,16 @@ export const queries: Queries = {
       with (o)
       match (o)-[:owns]->(d:dataset)
       return o{.name, .id, datasets:collect(d{.id, .name})}`,
-    removeTemplatesByName : 
+    removeTemplatesByRoleName : 
       'match (role:role {name: $roleName})-[rel:uses-template]->() delete rel',
-    updateTemplateByName: `match role:role {name: $roleName}),
+    removeTemplatesByRoleId :
+      'match (role:role {id: $roleId})-[rel:uses-template]->() delete rel',
+    updateTemplateByName: `match role:role {name: $roleName})
       (template: template {name: $templateName})
+      create (role)-[:uses-template]-(template)`,
+    updateTemplatesById : 
+      `match role:role {id: $roleId})
+      (template: template {id: $templateId})
       create (role)-[:uses-template]-(template)`,
     templates : 
       'match (d:dataset {id: $dataId})-[:has_template]->(t:template) return t',
