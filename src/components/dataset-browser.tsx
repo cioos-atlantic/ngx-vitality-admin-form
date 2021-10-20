@@ -125,7 +125,7 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
 
     render() {
         let defined = typeof this.state.dataName !== 'undefined';
-        let datasetDesc = defined ? this.state.dataName!.description : "Please choose a dataset to see options.";
+        let datasetDesc = defined ? this.state.dataName!.description_en : "Please choose a dataset to see options.";
         let datasetName = defined ? this.state.dataName!.name : "";
         let templateList = this.state.templates!.map((template, ind) => <TableCell component="th" key={template.id}>{template.name}</TableCell>);
         let roles = this.state.roles!
