@@ -23,6 +23,12 @@ export interface OrgDataset extends State {
     datasets: Dataset[];
 }
 
+export interface RoleDatasetTemp {
+    currRole: RoleTemp;
+    currTemp: Template;
+    currDataset: Dataset;
+}
+
 export interface Template extends State {
     name: string,
     id: string | number;
@@ -30,7 +36,8 @@ export interface Template extends State {
 }
 
 export interface DataState {
-    showconfirm: boolean
+    currDatasetRole?: RoleDatasetTemp[];
+    showconfirm: boolean;
     templates?: Template[];
     datasets: OrgDataset[];  
     orgName?: string;
@@ -38,5 +45,7 @@ export interface DataState {
     userName?: string;
     dataInd: string;
     elements?: string[];
-    roles?: RoleTemp[];  
+    roles?: RoleTemp[];
+    
+    open: boolean; 
 }

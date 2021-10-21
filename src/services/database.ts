@@ -3,7 +3,7 @@ import configData from '../config.json';
 import NotImplemented from '../util/not-implemented';
 import { DatasetParam, Param, queries} from './queries';
 import * as neo4j from 'neo4j-driver';
-import { User, OrgDataset, Dataset, Template, State } from '../state/datastate';
+import { User, OrgDataset, Dataset, Template, State, RoleDatasetTemp } from '../state/datastate';
 import {Role, RoleTemp} from '../state/role';
 
 /**
@@ -207,27 +207,44 @@ class DatabaseService {
         }
     }
 
-    async updateTemplate(role: RoleTemp, template: Template) {
+    async updateTemplate(roledatasettemp: RoleDatasetTemp) {
+        let role = roledatasettemp.currRole.role;
+        let oldtemp = roledatasettemp.currRole.uses;
+        let newtemp = roledatasettemp.currTemp;
+        let dataset = roledatasettemp.currDataset;
         // role contains the current template as role.uses
-        if (role.uses.id !== template.id) {
+        if (oldtemp.id !== newtemp.id) {
           let session!: neo4j.Session;
           try {
             session = this._driver.session({database: this._db});
-            return await session.run(queries.removeTemplatesByRoleId, {roleId: role.role.id.toString()})
-              .then((result) => {
-                  session.run(queries.updateTemplatesById, {
-                      roleId: role.role.id.toString(), 
-                      templateId: template.id.toString()
-                    })
+            return await session.run(queries.removeTemplatesByRoleId, 
+                {
+                    roleId: role.id.toString(), 
+                    datasetId: dataset.id.toString()
+                })
+              .then(() => {
+                  console.log(role.id.toString());
+                  console.log(newtemp.id.toString());
+                  console.log(queries.updateTemplatesById);
+                  return session.run(queries.updateTemplatesById, {
+                      roleId: role.id.toString(), 
+                      templateId: newtemp.id.toString()
+                    });
                   });
               } catch (e) {
             if (e instanceof Neo4jError) {
+                console.log(e);
+                console.log("First error!");
                 session = this._driver.session();
-                return await session.run(queries.removeTemplatesByRoleId, {roleId: role.role.id.toString()})
+                return await session.run(queries.removeTemplatesByRoleId, 
+                    {
+                        roleId: role.id.toString(),
+                        datasetId: dataset.id.toString()
+                    })
                   .then((result) => {
                     session.run(queries.updateTemplatesById, {
-                      roleId: role.role.id.toString(), 
-                      templateId: template.id.toString()
+                      roleId: role.id.toString(), 
+                      templateId: newtemp.id.toString()
                     })
                   });
             } else {
