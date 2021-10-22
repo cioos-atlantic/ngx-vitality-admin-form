@@ -230,7 +230,7 @@ class DatabaseService {
                   });
               } catch (e) {
             if (e instanceof Neo4jError) {
-                session = this._driver.session({database: this._db});
+                session = this._driver.session();
                 return await session.run(queries.removeTemplatesByRoleId, 
                     {
                       roleId: role.id.toString(), 
