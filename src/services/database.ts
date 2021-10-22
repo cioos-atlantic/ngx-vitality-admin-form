@@ -223,9 +223,6 @@ class DatabaseService {
                     datasetId: dataset.id.toString()
                 })
               .then(() => {
-                  console.log(role.id.toString());
-                  console.log(newtemp.id.toString());
-                  console.log(queries.updateTemplatesById);
                   return session.run(queries.updateTemplatesById, {
                       roleId: role.id.toString(), 
                       templateId: newtemp.id.toString()
@@ -233,20 +230,18 @@ class DatabaseService {
                   });
               } catch (e) {
             if (e instanceof Neo4jError) {
-                console.log(e);
-                console.log("First error!");
-                session = this._driver.session();
+                session = this._driver.session({database: this._db});
                 return await session.run(queries.removeTemplatesByRoleId, 
                     {
-                        roleId: role.id.toString(),
-                        datasetId: dataset.id.toString()
-                    })
-                  .then((result) => {
-                    session.run(queries.updateTemplatesById, {
+                      roleId: role.id.toString(), 
+                      datasetId: dataset.id.toString()
+                  })
+                .then(() => {
+                    return session.run(queries.updateTemplatesById, {
                       roleId: role.id.toString(), 
                       templateId: newtemp.id.toString()
-                    })
-                  });
+                    });
+                });
             } else {
                 throw e;
             }
