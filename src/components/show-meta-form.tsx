@@ -1,6 +1,5 @@
 import React from 'react';
 import DatasetBrowser from './dataset-browser';
-import MainProps from '../App';
 
 type MainState = {
     name: string
@@ -33,7 +32,6 @@ class ShowMetaForm extends React.Component<MainProps, MainState> {
         let name: string = this.props.user;
         let id: string = this.props.id;
         const datasetBrowserProps: MainProps = { id: id, user: name }
-        console.log(id);
 
         return (
             <div>
