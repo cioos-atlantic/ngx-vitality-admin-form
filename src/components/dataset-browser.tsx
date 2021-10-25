@@ -129,7 +129,7 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
                     key={dataset.id + "select"}>{dataset.name}</Button>
                     </Box>
             });
-            return (<Container><Chip label={"Organization" + org.name} key={org.id} />{datasets}</Container>);
+            return (<Container><Chip label={"Organization: " + org.name} key={org.id} />{datasets}</Container>);
         });
         return (<Grid item direction="column" xs={3} style={{
             display: "flex",
