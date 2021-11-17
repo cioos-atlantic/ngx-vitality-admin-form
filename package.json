@@ -2,6 +2,7 @@
   "name": "ngx-metadata-entry-form",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://test.cioosatlantic.ca/vitality",
   "dependencies": {
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
@@ -23,7 +24,8 @@
     "react-router-dom": "^5.3.0",
     "react-scripts": "^4.0.3",
     "ts-react-google-login-component": "^1.1.9",
-    "web-vitals": "^1.1.2"
+    "web-vitals": "^1.1.2",
+    "yarn": "^1.22.17"
   },
   "scripts": {
     "start": "react-scripts start",
