@@ -7,7 +7,7 @@ import Role, { RoleTemp } from '../state/role';
 import { Box, Chip, Container, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid } from '@mui/material';
 import {Table, TableCell, TableHead, TableRow, TableContainer} from '@mui/material';
 import {Paper} from '@mui/material';
-import { isTemplateLiteral, tsThisType } from '@babel/types';
+
 /**
  * React component to show datasets available in the registry, and the access permissions
  * based on templates and user roles.
@@ -37,12 +37,10 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
 
     componentDidUpdate(nextProps: MainProps) {
         if (this.props !== nextProps) {
-            console.log("updated");
             this.setState({ orgName: this.props.orgName, userName: this.props.user });
             this.getDatasets();
             
         }}
-
 
     getDatasetByIndex(index: string) {
         let alldatasets: Dataset = this.state.datasets
@@ -98,7 +96,6 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
                     });
                 
                 this.setState((state) => ({ roles: res, currDatasetRole: dataRoles }));
-                console.log(this.state.currDatasetRole);
             })
             
         }
@@ -164,7 +161,6 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
             }
         })
         this.setState((state) => ({currDatasetRole: datasetRole}));
-        console.log(this.state.currDatasetRole);
  
     }
 

@@ -2,8 +2,9 @@
 import { useEffect, useState } from 'react';
 import ShowMetaForm from './components/show-meta-form';
 import './App.css';
-import configData from './config.json';
-import { GoogleLogin, GoogleLogout } from 'react-google-login';
+import Button from '@mui/material/Button';
+import googleLogin from "./assets/googleImages/btn_google_signin_dark_normal_web.png"
+import { signInWithGoogle, signOutGoogle } from './services/firebase';
 
 /**
  * Main application information. Provides Google login button and form updating features as children.
@@ -12,29 +13,30 @@ import { GoogleLogin, GoogleLogout } from 'react-google-login';
  *
  */
 function App() {
-  const clientId: string = configData.FIREBASE.clientId;
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [name, setName] = useState("guest");
-  const [id, setId] = useState("0");
+  const [name, setName] = useState<string | null>(localStorage.getItem('userName'));
+  const [id, setId] = useState(localStorage.getItem('userId'));
 
   /// Handle Google login request.
-  const responseGoogle = (response: any) => {
-    setName(response.profileObj.name);
-    setId(response.profileObj.googleId);
-    setIsLoggedIn(true);
+  const responseGoogle = async () => {
+    const auth = await signInWithGoogle();
+    if (auth) {
+      setName(auth.user.displayName);
+      setId(auth.user.uid);
+      setIsLoggedIn(true);
+      localStorage.setItem('userName', auth.user.displayName ? auth.user.displayName : "guest");
+      localStorage.setItem('userId', auth.user.uid ? auth.user.uid : '0');
+    } 
   }
 
-  /// Handle an error in the Google response.
-  const responseFail = (response: any) => {
-    setIsLoggedIn(false);
-  }
-
-  const logout = () => {
+  const logout = async () => {
+    await signOutGoogle();
     setIsLoggedIn(false);
     setName("guest");
     setId("0");
+    localStorage.setItem('userName', "guest");
+    localStorage.setItem('userId', '0');
   }
-
 
   useEffect(() => {
 
@@ -45,24 +47,20 @@ function App() {
       {isLoggedIn ? (
         <div>
           Signed in as: <a href="#login">{name}</a>
-          <GoogleLogout
-            clientId={clientId}
-            buttonText="Logout"
-            onLogoutSuccess={logout}
-            >
-          </GoogleLogout>
-          <ShowMetaForm user={name} id={id} />
+          <Button
+          onClick={() => logout()}
+
+            > SignOut
+          </Button>
+          <ShowMetaForm user={name!} id={id!} />
         </div>    
       ) : (
         <div>
-          <GoogleLogin
-            clientId={clientId}
-            isSignedIn={true}
-            buttonText="Login with Google"
-            onSuccess={responseGoogle}
-            onFailure={responseFail}
-            cookiePolicy={'single_host_origin'}>
-          </GoogleLogin>
+          <Button
+            onClick={async () => {await responseGoogle();}}
+          >
+            <img src={googleLogin} alt="Google Sign-In Button"></img>
+          </Button>
         </div>
       )}
       
