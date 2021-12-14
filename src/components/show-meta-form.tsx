@@ -19,9 +19,6 @@ class ShowMetaForm extends React.Component<MainProps, MainState> {
         this.state = { name: this.props.user };
     }
 
-    getUpdatedUserName = () => this.props.user === "Ryan Deschamps" ? "admin_user" : "guest";
-    getUpdatedOrgName = () => this.props.user === "Ryan Deschamps" ? "PRIMED" : "guest";
-
     componentDidUpdate(nextProps: MainProps) {
         if (this.props !== nextProps) {
             this.setState({ name: this.props.user });
@@ -40,7 +37,7 @@ class ShowMetaForm extends React.Component<MainProps, MainState> {
                         backgroundPosition: 'center',
                         height: 200
                     }}>
-                    <h1 style={{ color: "white" }}>Vitality Registry Manager for user {name}</h1>
+                    <h1 style={{ color: "white" }}>Vitality Data Registry Manager</h1>
                     </div>
                 <DatasetBrowser {...datasetBrowserProps}></DatasetBrowser>
             </div>
