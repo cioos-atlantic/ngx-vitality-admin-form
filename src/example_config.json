@@ -12,5 +12,6 @@
         "appId": "APP_ID",
         "measurementId": "MEASUREMENT_ID",
         "clientId" : "APP_ID.apps.googleusercontent.com"   
-    }
+    },
+    "AUTH_KEY" : "AUTH_KEY"
 }

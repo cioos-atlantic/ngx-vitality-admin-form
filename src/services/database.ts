@@ -73,6 +73,17 @@ class DatabaseService {
         }
     }
 
+    async getUserIdFromApi(gid: string): Promise<User>{
+        let bearer = 'Bearer ' + configData.AUTH_KEY;
+        let url: string = configData.API_URL;
+        let res = await fetch(url + '/' + gid, {
+            headers: new Headers({
+            'Authorization' : bearer
+        }),
+    }).then((resp) => resp.json());
+        return {id: res['id'], gid: res['gid'], name: res['name']} as User;
+    }
+
     /**
      * Retrieve organizations and datasets accessible to the user based on id.
      * 
@@ -111,6 +122,18 @@ class DatabaseService {
         } finally {
             session.close()
         }
+    }
+
+    async getDatasetsFromApi(userid: string) {
+        let bearer = 'Bearer ' + configData.AUTH_KEY;
+        let url: string = configData.API_URL + "/datasets/"
+        let res: OrgDataset[] = await fetch(url + userid, {
+            headers: new Headers({'Authorization': bearer})
+        })
+          .then((resp) => resp.json())
+          .then((data) => {
+              return data['org_datasets'].map((record:OrgDataset) => record as OrgDataset)});
+        return res
     }
 
     /**
@@ -171,6 +194,19 @@ class DatabaseService {
             session.close();
         }
     }
+
+    async getRolesFromApi(dataset: Dataset) {
+        let bearer = 'Bearer ' + configData.AUTH_KEY;
+        let url: string = configData.API_URL + "/roles/";
+        let res: RoleTemp[] = await fetch(url + dataset.id, {
+            headers: new Headers({'Authorization' : bearer})
+        })
+            .then((resp) => resp.json())
+            .then((data) => {
+                return data['roles'].map((record: { role: Role; uses: Template; }) => <RoleTemp>record);
+            });
+        return res;
+    }
    
     /**
      * Retrieve the templates available for a particular datasets.
@@ -205,6 +241,19 @@ class DatabaseService {
         } finally {
             session.close();
         }
+    }
+
+    async getTemplatesFromApi(dataset:Dataset): Promise<Template[]> {
+        let bearer = 'Bearer ' + configData.AUTH_KEY;
+        let url: string = configData.API_URL + "/templates/";
+        let res: Template[] = await fetch(url + dataset.id, {
+            headers: new Headers({'Authorization' : bearer})
+        })
+            .then((resp) => resp.json())
+            .then((data) => {
+                return data['templates'].map((record: Template) => record as Template);
+            });
+        return res;
     }
 
     async updateTemplate(roledatasettemp: RoleDatasetTemp) {
@@ -249,6 +298,56 @@ class DatabaseService {
             session.close();
         }
     }
+    }
+
+    async updateTemplateByApi(roledatasettemp: RoleDatasetTemp) {
+        let bearer = 'Bearer ' + configData.AUTH_KEY;
+        let urlRem = configData.API_URL + '/remove_templates'
+        let urlUpd = configData.API_URL + '/update_templates'
+        let role = roledatasettemp.currRole.role;
+        let oldtemp = roledatasettemp.currRole.uses;
+        let newtemp = roledatasettemp.currTemp;
+        let dataset = roledatasettemp.currDataset;
+        let requestOptionsRem = {
+            method: 'POST',
+            headers: new Headers({
+                'Authorization' : bearer,
+                'Accept' : 'application/json',
+                'Content-Type': 'application/json'}),
+            body: JSON.stringify({
+                roleid: role.id,
+                datasetid: dataset.id
+            })
+        }
+        let requestOptionsUpd = {
+            method: 'POST',
+            headers: new Headers({
+                'Authorization' : bearer,
+                'Accept' : 'application/json',
+                'Content-Type': 'application/json'}),
+            body: JSON.stringify({
+                roleid: role.id,
+                templateid: newtemp.id})
+             }
+
+        if (oldtemp.id != newtemp.id) {
+            let res = await fetch(urlRem, requestOptionsRem)
+                .then((resp) => resp.json())
+                .then((data: Object) => {
+                    if (Object.keys(data).includes("success")) {
+                        return fetch(urlUpd, requestOptionsUpd)
+                          .then((resp) => resp.json())
+                          .then((data: Object) => {
+                              if (Object.keys(data).includes("success")) {
+                                  return true
+                              } else {
+                                  return false
+                              }
+                          })
+                    }        
+                });
+            return res;
+        }
     }
 
     makeQueryNeo4J(query: string, params: Param) {

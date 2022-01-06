@@ -7,7 +7,7 @@ import Role, { RoleTemp } from '../state/role';
 import { Box, Chip, Container, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid } from '@mui/material';
 import {Table, TableCell, TableHead, TableRow, TableContainer} from '@mui/material';
 import {Paper} from '@mui/material';
-import { isTemplateLiteral, tsThisType } from '@babel/types';
+
 /**
  * React component to show datasets available in the registry, and the access permissions
  * based on templates and user roles.
@@ -37,12 +37,10 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
 
     componentDidUpdate(nextProps: MainProps) {
         if (this.props !== nextProps) {
-            console.log("updated");
             this.setState({ orgName: this.props.orgName, userName: this.props.user });
             this.getDatasets();
             
         }}
-
 
     getDatasetByIndex(index: string) {
         let alldatasets: Dataset = this.state.datasets
@@ -66,10 +64,10 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
     }
 
     getDatasets() {
-        this._db.getUserId(this.props.id).then((user) => {
+        this._db.getUserIdFromApi(this.props.id).then((user) => {
             let userid = user ? user.id : '0';
             let username = user ? user.name : 'guest';
-            this._db.getDatasets(userid).then((data: OrgDataset[]) => {
+            this._db.getDatasetsFromApi(userid).then((data: OrgDataset[]) => {
                 this.setState((state) => ({ datasets: data, userName: username }))
             });
         })
@@ -79,7 +77,7 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
         if (this.state.dataInd !== "") {
             this.getRoles();
             let dataset = this.getDatasetByIndex(this.state.dataInd);
-            this._db.getTemplates(dataset).then((res: Template[]) => {
+            this._db.getTemplatesFromApi(dataset).then((res: Template[]) => {
                 this.setState((state) => ({ templates: res}))
             })
         }
@@ -88,7 +86,7 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
     getRoles() {
         if (this.state.dataInd !== '') {
             let dataset: Dataset = this.getDatasetByIndex(this.state.dataInd);
-            this._db.getRoles(dataset).then((res: RoleTemp[]) => {
+            this._db.getRolesFromApi(dataset).then((res: RoleTemp[]) => {
                 let dataRoles = res.map((roletemp: RoleTemp) => {
                         return {
                             currRole: roletemp,
@@ -98,7 +96,6 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
                     });
                 
                 this.setState((state) => ({ roles: res, currDatasetRole: dataRoles }));
-                console.log(this.state.currDatasetRole);
             })
             
         }
@@ -129,7 +126,7 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
                     key={dataset.id + "select"}>{dataset.name}</Button>
                     </Box>
             });
-            return (<Container><Chip label={"Organization: " + org.name} key={org.id} />{datasets}</Container>);
+            return (<Container><Chip label={org.name} key={org.id} />{datasets}</Container>);
         });
         return (<Grid item direction="column" xs={3} style={{
             display: "flex",
@@ -141,7 +138,7 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
         event.preventDefault(); 
         let state = this.state.currDatasetRole;
         state!.forEach((val, ind) => {
-            this._db.updateTemplate(val);
+            this._db.updateTemplateByApi(val);
             this.state.currDatasetRole![ind] = {
                 currDataset: this.getDatasetByIndex(this.state.dataInd),
                 currRole: {role: val.currRole.role, uses: val.currTemp} as RoleTemp,
@@ -164,15 +161,22 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
             }
         })
         this.setState((state) => ({currDatasetRole: datasetRole}));
-        console.log(this.state.currDatasetRole);
  
+    }
+
+    getDatasetDescription(dataset: Dataset) {
+        if (this.state.dataInd !== '' && typeof dataset !== 'undefined') {
+            return dataset.description_en.length < 255 ? dataset.description_en : dataset.description_en.substring(0, 255);
+        } else {
+            return "Please choose a dataset to see options";
+        }
     }
 
 
     render() {
         let defined = this.state.dataInd !== '';
         let dataset = this.getDatasetByIndex(this.state.dataInd);
-        let datasetDesc = defined ? dataset.description_en : "Please choose a dataset to see options.";
+        let datasetDesc = this.getDatasetDescription(dataset);
         let datasetName = defined ? dataset.name : "";
         let templateList = this.state.templates!.map((template, ind) => <TableCell component="th" key={template.id}>{template.name}</TableCell>);
         let roles = this.state.roles!
@@ -205,12 +209,12 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
                 <Grid container spacing={2}>
                     {this.getDatasetList()}
 
-                    <Grid xs={6} direction="column">
+                    <Grid xs={8} direction="column">
                         <h2> Dataset pane for {datasetName}</h2>
-                        <div className="row">{datasetDesc}.</div>
+                        <div className="row">{datasetDesc}...</div>
                         <form onSubmit={this.handleSubmit} name="template" id="template">
                             <TableContainer component={Paper}>
-                            <Table sx={{ minWidth: 650}}>
+                            <Table>
                                 <TableHead>
                                     <TableRow>
                                         <TableCell component="th" key="role-header" scope="col">Role</TableCell>

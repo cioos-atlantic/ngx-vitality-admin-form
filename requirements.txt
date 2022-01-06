@@ -1,0 +1,7 @@
+#######
+
+flask
+neo4j
+python-dotenv
+dataclasses
+flask_httpauth
