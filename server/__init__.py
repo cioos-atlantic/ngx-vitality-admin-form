@@ -81,9 +81,9 @@ class Neo4JMiddleWare(Query):
 
     @staticmethod
     def getUserIdHelper(tx, gid):
-        query = Query.userByGid
-        result = tx.run(query, userGid=gid)
+        query = Query.userByGid  
         try:
+            result = tx.run(query, userGid=gid)
             return [record["id"] for record in result]
         except ServiceUnavailable as exception:
             logging.error(f"{query} raised an error: \n {exception}")
@@ -96,9 +96,9 @@ class Neo4JMiddleWare(Query):
 
     @staticmethod
     def getDatasetsHelper(tx, userid):
-        query = Query.datasetsById
-        result = tx.run(query, userId=userid)
+        query = Query.datasetsById 
         try:
+            result = tx.run(query, userId=userid)
             return [record['org'] for record in result]
         except ServiceUnavailable as exception:
             logging.error(f"{query} raised an error: \n {exception}")
@@ -109,14 +109,13 @@ class Neo4JMiddleWare(Query):
             result = session.write_transaction(self.removeTemplatesByRoleIdHelper, 
             roleid, 
             datasetid)
-            print(result)
         return result
 
     @staticmethod
     def removeTemplatesByRoleIdHelper(tx, roleid, datasetid):
-        query = Query.removeTemplatesByRoleId
-        result = tx.run(query, roleId=roleid, datasetId=datasetid)
+        query = Query.removeTemplatesByRoleId 
         try:
+            result = tx.run(query, roleId=roleid, datasetId=datasetid)
             return result.single()['id']
         except ServiceUnavailable as exception:
             logging.error(f"{query} raised an error: \n {exception}")
@@ -128,16 +127,14 @@ class Neo4JMiddleWare(Query):
             result = session.write_transaction(self.updateTemplateByIdHelper,
             roleid, 
             templateid)
-            print(result)
         return result
             # Do we need to return something here?
 
     @staticmethod
     def updateTemplateByIdHelper(tx, roleid, templateid):
         query = Query.updateTemplateById
-        result = tx.run(query, roleId=roleid, templateId=templateid)
         try:
-            print (result)
+            result = tx.run(query, roleId=roleid, templateId=templateid)
         except ServiceUnavailable as exception:
             logging.error(f"{query} raised an error: \n {exception}")
             raise
@@ -145,15 +142,13 @@ class Neo4JMiddleWare(Query):
     def getTemplates(self, datasetid): 
         with self.driver.session() as session:
             result = session.read_transaction(self.getTemplatesHelper, datasetid)
-            for record in result:
-                print(record)
         return [record for record in result]
 
     @staticmethod
     def getTemplatesHelper(tx, datasetid):
         query= Query.templates
-        result = tx.run(query, datasetId=datasetid)
         try:
+            result = tx.run(query, datasetId=datasetid)
             return [record['t'] for record in result.data()]
         except ServiceUnavailable as exception:
             logging.error(f"{query} raised an error: \n {exception}")
@@ -162,15 +157,13 @@ class Neo4JMiddleWare(Query):
     def getRoles(self, datasetid):
         with self.driver.session() as session:
             result = session.read_transaction(self.getRolesHelper, datasetid)
-            for record in result:
-                print(record)
         return [record for record in result]
 
     @staticmethod
     def getRolesHelper(tx, datasetid):
-        query = Query.roles
-        result = tx.run(query, datasetId=datasetid)
+        query = Query.roles   
         try:
+            result = tx.run(query, datasetId=datasetid)
             return [{"role": record['role'], "uses": record['uses']} for record in result]
         except ServiceUnavailable as exception:
             logging.error(f"{query} raised an error: \n {exception}")
@@ -205,25 +198,24 @@ def remove_templates():
     datasetid = data['datasetid']
     try:
         db.removeTemplatesByRoleId(roleid, datasetid)
-        print(f'Successfully remove templates on behalf of {roleid}')
+        logging.info(f'Successfully remove templates on behalf of {roleid}')
         return {"success" : "requested templates removed"}
     except Neo4jError as exception:
-        print(exception)
+        logging.error(exception)
         return {"error": exception.message}
 
 @app.route("/update_templates", methods=['POST'])
 @auth.login_required
 def update_templates():
     data = request.json
-    print(data)
     roleid = data['roleid']
     templateid = data['templateid']
     try:
         db.updateTemplateById(roleid, templateid)
-        print(f'Successfully updated template {templateid} on behalf of {roleid}')
+        logging.info(f'Successfully updated template {templateid} on behalf of {roleid}')
         return {"success" : "requested templates updated"}
     except Neo4jError as exception:
-        print(exception)
+        logging.error(exception)
         return {"error" : exception.message}
 
 @app.route("/roles/<uuid:datasetid>")
@@ -237,4 +229,4 @@ def getTemplates(datasetid):
     return {"templates": db.getTemplates(str(datasetid))}
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5005)
+    app.run(debug=True, host="0.0.0.0", port=5005)

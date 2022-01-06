@@ -88,7 +88,6 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
             let dataset: Dataset = this.getDatasetByIndex(this.state.dataInd);
             this._db.getRolesFromApi(dataset).then((res: RoleTemp[]) => {
                 let dataRoles = res.map((roletemp: RoleTemp) => {
-                    console.log(roletemp); 
                         return {
                             currRole: roletemp,
                             currTemp: roletemp.uses,

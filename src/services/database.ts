@@ -5,7 +5,6 @@ import { DatasetParam, Param, queries} from './queries';
 import * as neo4j from 'neo4j-driver';
 import { User, OrgDataset, Dataset, Template, State, RoleDatasetTemp } from '../state/datastate';
 import {Role, RoleTemp} from '../state/role';
-import { buildMatchMemberExpression } from '@babel/types';
 
 /**
  * A service to control access to and from the database.
@@ -252,7 +251,6 @@ class DatabaseService {
         })
             .then((resp) => resp.json())
             .then((data) => {
-                console.log(data)
                 return data['templates'].map((record: Template) => record as Template);
             });
         return res;
@@ -332,8 +330,6 @@ class DatabaseService {
                 templateid: newtemp.id})
              }
 
-        console.log(requestOptionsRem);
-        console.log(requestOptionsUpd);
         if (oldtemp.id != newtemp.id) {
             let res = await fetch(urlRem, requestOptionsRem)
                 .then((resp) => resp.json())
