@@ -206,7 +206,7 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
         return (
             <Container>
                 <h1>{userName}</h1>
-                <Grid container spacing={2}>
+                <Grid container>
                     {this.getDatasetList()}
 
                     <Grid xs={8} direction="column">

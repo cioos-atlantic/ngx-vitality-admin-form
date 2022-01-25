@@ -1,7 +1,7 @@
 import React from 'react';
 import DatasetBrowser from './dataset-browser';
 
-type MainState = {
+export type MainState = {
     name: string
 }
 

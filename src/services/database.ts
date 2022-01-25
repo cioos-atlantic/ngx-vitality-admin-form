@@ -203,7 +203,7 @@ class DatabaseService {
         })
             .then((resp) => resp.json())
             .then((data) => {
-                return data['roles'].map((record: { role: Role; uses: Template; }) => <RoleTemp>record);
+                return data['roles'].map((record: { role: Role; uses: Template; }) => record as RoleTemp);
             });
         return res;
     }
@@ -330,7 +330,7 @@ class DatabaseService {
                 templateid: newtemp.id})
              }
 
-        if (oldtemp.id != newtemp.id) {
+        if (oldtemp.id !== newtemp.id) {
             let res = await fetch(urlRem, requestOptionsRem)
                 .then((resp) => resp.json())
                 .then((data: Object) => {
