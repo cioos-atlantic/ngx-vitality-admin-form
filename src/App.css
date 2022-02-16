@@ -4,6 +4,17 @@ header > * {
   gap: 3rem; 
 }
 
+div.navbar {
+  margin-left: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+div.description {
+  margin: auto;
+  padding: 10px;
+}
+
 .figure img {
   display: flex;
   height: 5em;
@@ -55,7 +66,7 @@ nav {
   padding: 2px;
 }
 
-.MuiChip-root {
+.MuiPaper-root {
   padding: 3px;
 }
 

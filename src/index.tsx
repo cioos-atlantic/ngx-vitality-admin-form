@@ -6,7 +6,8 @@ import reportWebVitals from './reportWebVitals';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 
-const basename =  (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') ? "/" : "/vitality"
+const basename = document.querySelector('base')?.getAttribute('href') ?? '/';
+
 const homeProps = {
   body: "home"
 };
@@ -22,9 +23,9 @@ ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter basename={basename}>
     <Routes>
-        <Route path="*" element= {<App {...homeProps} />} />
+        <Route path='*' element= {<App {...homeProps} />} />
         <Route path="/about" element={<App {...aboutProps} />} />
-        <Route path="request" element={<App {...requestProps} />} />
+        <Route path="/request" element={<App {...requestProps} />} />
         </Routes>
     </BrowserRouter> 
   </React.StrictMode>,

@@ -4,7 +4,7 @@ import { Dataset, DataState, OrgDataset, RoleDatasetTemp, Template } from '../st
 import Button from '@mui/material/Button';
 import DatabaseService from '../services/database';
 import Role, { RoleTemp } from '../state/role';
-import { Box, Chip, Container, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid } from '@mui/material';
+import { Box, Card, CardContent, Typography, Container, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid, CardMedia } from '@mui/material';
 import {Table, TableCell, TableHead, TableRow, TableContainer} from '@mui/material';
 import {Paper} from '@mui/material';
 
@@ -126,9 +126,18 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
                     key={dataset.id + "select"}>{dataset.name}</Button>
                     </Box>
             });
-            return (<Container><Chip label={org.name} key={org.id} />{datasets}</Container>);
+            return (
+            <Container>
+                <Card sx={{display: 'flex'}} elevation={2} key={org.id}>
+                    <CardMedia component="img" sx={{width: 50}} image={org.icon ? org.icon : "https://img.icons8.com/ios/50/000000/ocean-wave.png"} />
+                    <CardContent>
+                        <Typography component="div" variant="h5">{org.name}</Typography>
+                    </CardContent>
+                </Card>
+                {datasets}
+            </Container>);
         });
-        return (<Grid item direction="column" xs={3} style={{
+        return (<Grid item xs={3} style={{
             display: "flex",
             justifyContent: "flex-start"
         }}>{ret}</Grid>)
@@ -205,13 +214,12 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
         let userName = this.state.userName;
         return (
             <Container>
-                <h1>{userName}</h1>
                 <Grid container>
                     {this.getDatasetList()}
 
                     <Grid xs={8} direction="column">
                         <h2> Dataset pane for {datasetName}</h2>
-                        <div className="row">{datasetDesc}...</div>
+                        <div className="description">{datasetDesc}...</div>
                         <form onSubmit={this.handleSubmit} name="template" id="template">
                             <TableContainer component={Paper}>
                             <Table>

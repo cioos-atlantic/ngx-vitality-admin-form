@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import ShowMetaForm from './components/show-meta-form';
 import './App.css';
 import Button from '@mui/material/Button';
-import googleLogin from "./assets/googleImages/btn_google_signin_dark_normal_web.png"
+import googleLogin from "./assets/googleImages/btn_google_signin_dark_normal_web.png";
 import { signInWithGoogle, signOutGoogle } from './services/firebase';
 import { NavLink } from 'react-router-dom';
 import About from './components/about';
@@ -92,7 +92,7 @@ function App(props: { body: String; }) {
             </Button>
           </div>
 
-          <div>
+          <div className='navbar'>
             {navigation()}
             <div className="sign-in-name"> Signed in as: <a href="#login">{name}</a></div>
 
@@ -111,7 +111,7 @@ function App(props: { body: String; }) {
                 <img src={googleLogin} alt="Google Sign-In Button"></img>
               </Button>
             </div>
-            <div>
+            <div className="navbar">
               {navigation()}
             </div>
           </header>

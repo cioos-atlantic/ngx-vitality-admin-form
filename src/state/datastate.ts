@@ -20,6 +20,7 @@ export interface Dataset extends State {
 export interface OrgDataset extends State {
     name: string;
     id: string | number;
+    icon?: string;
     datasets: Dataset[];
 }
 
@@ -46,6 +47,5 @@ export interface DataState {
     dataInd: string;
     elements?: string[];
     roles?: RoleTemp[];
-    
     open: boolean; 
 }

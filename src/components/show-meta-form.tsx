@@ -32,13 +32,7 @@ class ShowMetaForm extends React.Component<MainProps, MainState> {
 
         return (
             <div>
-                <div style={{
-                        backgroundImage: `url('https://d2zmi9say0r1yj.cloudfront.net/OceanImageBank_ThomasHorig_10.jpg')`,
-                        backgroundPosition: 'center',
-                        height: 200
-                    }}>
-                    <h1 style={{ color: "white" }}>Vitality Data Registry Manager</h1>
-                    </div>
+                <h1 style={{ color: "white" }}>Vitality Data Registry Manager</h1>
                 <DatasetBrowser {...datasetBrowserProps}></DatasetBrowser>
             </div>
             );
