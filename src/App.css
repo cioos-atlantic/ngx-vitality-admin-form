@@ -1,47 +1,78 @@
-.App {
-  text-align: center;
-}
+@import url('https://cioosatlantic.ca/wp-content/cache/minify/2210e.css?x48800');
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+header > * {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  flex: 1;
+  gap: 3rem; 
 }
 
-.App-link {
-  color: #61dafb;
+.orgset-container {
+  display: block;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+div.navbar {
+  margin-left: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+div.description {
+  margin: auto;
+  padding: 10px;
+}
+
+.figure img {
+  display: flex;
+  height: 5em;
+}
+
+.contactForm {
+  margin: 10px;
+  padding: 10px;
+  width: 500px;
+}
+
+.contactForm form > div {
+  padding: 10px;
+}
+
+textarea {
+  width: 500px;
+}
+
+header .pre-nav {
+  display: flex;
+  background: #e55162;
+}
+
+.pre-nav {
+  height: 3em;
+}
+
+.pre-nav .container {
+  display: flex;
+}
+
+.nationalLogo img {
+  align-self: center;
+  width: 5em;
+}
+
+.pre-nav .container .aside {
+  display: flex;
+  align-self: center;
+}
+
+nav {
+  display: flex;
+  gap: 1rem;
 }
 
 .MuiBox-root {
   padding: 2px;
 }
 
-.MuiChip-root {
+.MuiPaper-root {
   padding: 3px;
 }
 

@@ -1,4 +1,3 @@
-
 import * as firebase from "firebase/app";
 import {getAuth, GoogleAuthProvider, signInWithPopup, signOut, UserCredential } from "firebase/auth";
 import configData from '../config.json';

@@ -3,13 +3,31 @@ import * as ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 
+const basename = document.querySelector('base')?.getAttribute('href') ?? '/';
+
+const homeProps = {
+  body: "home"
+};
+const aboutProps = {
+  body: "about"
+}
+const requestProps = {
+  body: "request"
+}
 
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter basename={basename}>
+    <Routes>
+        <Route path='*' element= {<App {...homeProps} />} />
+        <Route path="/about" element={<App {...aboutProps} />} />
+        <Route path="/request" element={<App {...requestProps} />} />
+        </Routes>
+    </BrowserRouter> 
   </React.StrictMode>,
   document.getElementById('root')
 );
