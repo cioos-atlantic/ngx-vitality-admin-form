@@ -1,7 +1,13 @@
+@import url('https://cioosatlantic.ca/wp-content/cache/minify/2210e.css?x48800');
+
 header > * {
   display: flex;
   flex: 1;
   gap: 3rem; 
+}
+
+.orgset-container {
+  display: block;
 }
 
 div.navbar {
@@ -34,7 +40,7 @@ textarea {
   width: 500px;
 }
 
-.pre-nav {
+header .pre-nav {
   display: flex;
   background: #e55162;
 }

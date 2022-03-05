@@ -120,14 +120,14 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
             // highlight button if it is the current one.   
             let datasets: JSX.Element[] = org.datasets.map((dataset) => {
                 let active: Boolean = this.state.dataInd !== "" && dataset.id === this.state.dataInd;
-                return <Box mx="auto">
+                return (<Box mx="auto">
                     <Button variant={active ? "outlined" : "contained"}
                     onClick={() => this.setData(dataset.id.toString())}
                     key={dataset.id + "select"}>{dataset.name}</Button>
-                    </Box>
+                    </Box>)
             });
             return (
-            <Container>
+            <Container className="orgset-container">
                 <Card sx={{display: 'flex'}} elevation={2} key={org.id}>
                     <CardMedia component="img" sx={{width: 50}} image={org.icon ? org.icon : "https://img.icons8.com/ios/50/000000/ocean-wave.png"} />
                     <CardContent>
@@ -137,10 +137,7 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
                 {datasets}
             </Container>);
         });
-        return (<Grid item xs={3} style={{
-            display: "flex",
-            justifyContent: "flex-start"
-        }}>{ret}</Grid>)
+        return (<Grid item xs={3}>{ret}</Grid>)
     }
 
     handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -173,9 +170,13 @@ class DatasetBrowser extends React.Component<MainProps, DataState>  {
  
     }
 
-    getDatasetDescription(dataset: Dataset) {
+    getDatasetDescription(dataset: Dataset): String {
         if (this.state.dataInd !== '' && typeof dataset !== 'undefined') {
-            return dataset.description_en.length < 255 ? dataset.description_en : dataset.description_en.substring(0, 255);
+            if (dataset.description_en !== null) {
+                return dataset.description_en.length < 255 ? dataset.description_en : dataset.description_en.substring(0, 255);
+            } else  {
+                return "No description available for this dataset."
+            }        
         } else {
             return "Please choose a dataset to see options";
         }
